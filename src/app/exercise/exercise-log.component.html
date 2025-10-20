@@ -1,0 +1,115 @@
+<div class="page">
+  <h2>Exercise Log</h2>
+
+  <div class="alerts">
+    <div class="alert error" *ngIf="errorMsg()">{{ errorMsg() }}</div>
+    <div class="alert success" *ngIf="successMsg()">{{ successMsg() }}</div>
+  </div>
+
+  <!-- Weekly summary -->
+  <div class="card summary">
+    <div class="row">
+      <div>
+        <div class="kpi">{{ weeklyTotals().count }}</div>
+        <div class="label">Sessions (7 days)</div>
+      </div>
+      <div>
+        <div class="kpi">{{ weeklyTotals().totalMin }}</div>
+        <div class="label">Total Minutes</div>
+      </div>
+      <div>
+        <!-- match your unit strings -->
+        <div class="kpi" *ngIf="unit==='Kilometers'">{{ weeklyTotals().totalKm | number:'1.1-1' }}</div>
+        <div class="kpi" *ngIf="unit==='Miles'">{{ weeklyTotals().totalMi | number:'1.1-1' }}</div>
+        <div class="label">Total Distance ({{ unit }})</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Form (Create/Update) -->
+  <div class="card">
+    <form [formGroup]="form" (ngSubmit)="submit()" class="grid">
+      <label>
+        <span>Date / Time</span>
+        <input type="datetime-local" formControlName="dateTime" />
+        <small class="invalid" *ngIf="f.dateTime.touched && f.dateTime.invalid">Required.</small>
+      </label>
+
+      <label>
+        <span>Activity</span>
+        <select formControlName="activityType">
+          <option *ngFor="let a of activities" [value]="a">{{ a }}</option>
+        </select>
+        <small class="invalid" *ngIf="f.activityType.touched && f.activityType.invalid">Choose an activity.</small>
+      </label>
+
+      <label>
+        <span>Duration (minutes)</span>
+        <input type="number" min="1" formControlName="durationMinutes" />
+        <small class="invalid" *ngIf="f.durationMinutes.touched && f.durationMinutes.errors?.['minDuration']">
+          Must be at least {{ f.durationMinutes.errors?.['minDuration'].min }} min.
+        </small>
+        <small class="invalid" *ngIf="f.durationMinutes.touched && f.durationMinutes.errors?.['positive']">
+          Must be positive.
+        </small>
+      </label>
+
+      <label>
+        <span>
+          Distance ({{ unit }})
+          <button type="button" class="chip" (click)="toggleUnit()">
+            Switch to {{ unit === 'Miles' ? 'Kilometers' : 'Miles' }}
+          </button>
+        </span>
+        <input type="number" min="0" step="0.1" formControlName="distance" />
+        <small class="muted">Optional for Play/Park/Frisbee, recommended for Walk/Run.</small>
+      </label>
+
+      <label class="full">
+        <span>Notes</span>
+        <textarea rows="2" formControlName="notes" maxlength="500" placeholder="Where did you go? Weather? Pace?"></textarea>
+      </label>
+
+      <div class="full muted pace" *ngIf="pace()">Approx pace: {{ pace() }}</div>
+
+      <div class="actions">
+        <button type="submit" [disabled]="form.invalid">{{ isEditing() ? 'Update' : 'Save' }}</button>
+        <button type="button" class="secondary" *ngIf="isEditing()" (click)="cancelEdit()">Cancel</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- List (Read) -->
+  <div class="card">
+    <h3>Recent Sessions</h3>
+    <div *ngIf="loading()">Loading…</div>
+
+    <table *ngIf="!loading() && items().length" class="table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Activity</th>
+          <th>Duration</th>
+          <th>Distance (miles)</th>
+          <th>Notes</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let it of items()">
+          <td>{{ it.date | date:'yyyy-MM-dd HH:mm' }}</td>
+          <td>{{ it.activityType }}</td>
+          <td>{{ it.durationMinutes }} min</td>
+          <td>{{ it.distanceMiles || 0 }}</td>
+          <td>{{ it.notes }}</td>
+          <td class="actions">
+            <button (click)="edit(it)">Edit</button>
+            <button class="danger" (click)="delete(it._id)">Delete</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p *ngIf="!loading() && !items().length" class="muted">No sessions yet — add your first above.</p>
+  </div>
+</div>
