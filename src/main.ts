@@ -3,5 +3,5 @@ import { provideHttpClient, withFetch } from '@angular/common/http'; // <-- add 
 import { AppComponent } from './app/app.component';
 
 bootstrapApplication(AppComponent, {
-  providers: [provideHttpClient(withFetch())] // <-- enable Fetch for HttpClient
-}).catch(err => console.error(err));
+  providers: [provideHttpClient(withFetch())]
+});
