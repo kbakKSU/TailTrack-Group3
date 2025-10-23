@@ -8,7 +8,7 @@ export type Exercise = {
   date: string;
   activityType: 'Walk' | 'Run' | 'Play' | 'Park' | 'Frisbee' | 'Swim' | 'Hike' | 'Training' | 'Other';
   durationMinutes: number;
-  distanceMiles?: number;  // <-- miles, not km
+  distanceMiles?: number;  
   notes?: string;
   createdAt?: string;
 };
@@ -30,7 +30,7 @@ export class ExerciseService {
   // helper for weekly window (last 7 days inclusive)
   last7Days(petId?: string) {
     const now = new Date();
-    const start = new Date(now); start.setDate(now.getDate() - 6); // 7-day window
+    const start = new Date(now); start.setDate(now.getDate() - 6); 
     return this.list(petId).pipe(
       map(items => items.filter(x => {
         const d = new Date(x.date);
